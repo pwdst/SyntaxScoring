@@ -31,6 +31,30 @@ class LineStatus(Enum):
     Incomplete = 3
 
 
+class ProcessLineResult:
+    def __init__(self, line_status, failure_index=None):
+        self._line_status = line_status
+        self._failure_index = failure_index
+
+    def line_status(self):
+        return self._line_status
+
+    def failure_index(self):
+        return self._failure_index
+
+    @staticmethod
+    def success_result():
+        return ProcessLineResult(LineStatus.ParsedSuccessfully)
+
+    @staticmethod
+    def corrupted_result(failure_index):
+        return ProcessLineResult(LineStatus.Corrupted, failure_index)
+
+    @staticmethod
+    def incomplete_result(failure_index):
+        return ProcessLineResult(LineStatus.Incomplete, failure_index)
+
+
 # https://docs.python.org/3/tutorial/classes.html
 class Chunk:
     def __init__(self, start_character, start_index, parent=None):

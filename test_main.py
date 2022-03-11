@@ -79,5 +79,29 @@ class ChunkTestCase(unittest.TestCase):
 
                 self.assertIsNone(chunk.end_index())
 
+
+class ProcessLineResultTestCase(unittest.TestCase):
+    def test_process_line_success_result(self):
+        result = main.ProcessLineResult.success_result()
+
+        self.assertEqual(main.LineStatus.ParsedSuccessfully, result.line_status())
+
+        self.assertIsNone(result.failure_index())
+
+    def test_process_line_success_result(self):
+        result = main.ProcessLineResult.corrupted_result(8)
+
+        self.assertEqual(main.LineStatus.Corrupted, result.line_status())
+
+        self.assertEqual(8, result.failure_index())
+
+    def test_process_line_success_result(self):
+        result = main.ProcessLineResult.incomplete_result(8)
+
+        self.assertEqual(main.LineStatus.Incomplete, result.line_status())
+
+        self.assertEqual(8, result.failure_index())
+
+
 if __name__ == '__main__':
     unittest.main()
