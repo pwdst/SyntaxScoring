@@ -32,7 +32,7 @@ class LineStatus(Enum):
 
 
 class ProcessLineResult:
-    def __init__(self, line_status, failure_index=None):
+    def __init__(self, line_status: LineStatus, failure_index: int = None):
         self._line_status = line_status
         self._failure_index = failure_index
 
@@ -47,11 +47,11 @@ class ProcessLineResult:
         return ProcessLineResult(LineStatus.ParsedSuccessfully)
 
     @staticmethod
-    def corrupted_result(failure_index):
+    def corrupted_result(failure_index: int):
         return ProcessLineResult(LineStatus.Corrupted, failure_index)
 
     @staticmethod
-    def incomplete_result(failure_index):
+    def incomplete_result(failure_index: int):
         return ProcessLineResult(LineStatus.Incomplete, failure_index)
 
 
@@ -79,7 +79,7 @@ class Chunk:
     def parent(self):
         return self._parent
 
-    def try_end_chunk(self, end_character, end_index):
+    def try_end_chunk(self, end_character: str, end_index: int):
         # https://docs.python.org/3/tutorial/controlflow.html
         # Python match does not fall through cases and you don't seem to be able to use
         # alternation with a guard clause - refactor to if
@@ -92,3 +92,50 @@ class Chunk:
             return True
 
         return False
+
+
+def process_line(line: str) -> ProcessLineResult:
+    current_chunk: Chunk = None
+
+    parsed_chunks = list[Chunk]
+
+    for line_index in len(line):
+        match line[line_index]:
+            case '<' | '{' | '(' | '[':
+                if current_chunk is None:
+                    current_chunk = Chunk(line[line_index], line_index)
+
+                    parsed_chunks.Add(current_chunk)
+
+                    continue
+
+                child_chunk = Chunk(line[line_index], line_index, child_chunk)
+
+                parsed_chunks.Add(child_chunk)
+
+                current_chunk = child_chunk
+
+                continue
+
+            case '>' | '}' | ')' | ']':
+
+                if current_chunk is not None and current_chunk.try_end_chunk(line[line_index], line_index):
+                    current_chunk = current_chunk.Parent
+
+                    continue
+
+                return ProcessLineResult.corrupted_result(line_index)
+
+        break
+
+    # If we get to this point then we haven't found any rogue end tags, do we have any unclosed chunks
+
+    for parsed_chunk in parsed_chunks:
+        if isinstance(parsed_chunk, Chunk) and parsed_chunk.end_index() is None:
+            first_unclosed_chunk = parsed_chunk
+            break
+
+    if first_unclosed_chunk is None:
+        return ProcessLineResult.success_result() # If we reach here then all pairs were successfully matched
+
+    return ProcessLineResult.incomplete_result(first_unclosed_chunk.StartIndex)
