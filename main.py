@@ -33,15 +33,12 @@ class LineStatus(Enum):
 
 # https://docs.python.org/3/tutorial/classes.html
 class Chunk:
-    def __init__(self, start_character, start_index):
+    def __init__(self, start_character, start_index, parent=None):
         self._start_character = start_character
         self._start_index = start_index
         self._end_character = None
         self._end_index = None
-
-    def __init__(self, start_character, start_index, parent):
         self._parent = parent
-        self.__init__(start_character, start_index)
 
     def start_character(self):
         return self._start_character
