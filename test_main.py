@@ -40,7 +40,7 @@ class ChunkTestCase(unittest.TestCase):
 
         # todo Is there a better way to do this?
         for i in range(len(start_tags)):
-            with self.subTest(i=i):
+            with self.subTest(i):
                 start_tag = start_tags[i]
 
                 end_tag = end_tags[i]
@@ -64,7 +64,7 @@ class ChunkTestCase(unittest.TestCase):
 
         # todo Is there a better way to do this?
         for i in range(len(start_tags)):
-            with self.subTest(i=i):
+            with self.subTest(i):
                 start_tag = start_tags[i]
 
                 end_tag = end_tags[i]
@@ -78,6 +78,27 @@ class ChunkTestCase(unittest.TestCase):
                 self.assertIsNone(chunk.end_character())
 
                 self.assertIsNone(chunk.end_index())
+
+
+class GetErrorScoreTestCase(unittest.TestCase):
+    def test_get_error_score_returns_expected(self):
+        line = "([{<({<[{<([])>}]>})>}])"
+
+        index_score_dictionary = {
+            13: 3,  # )
+            14: 25137,  # >
+            15: 1197,  # }
+            16: 57  # ]
+        }
+
+        # todo Is there a better way to do this?
+        for index in index_score_dictionary:
+            with self.subTest(index):
+                expected_score = index_score_dictionary[index]
+
+                result = main.get_error_score(line, index)
+
+                self.assertEqual(expected_score, result)
 
 
 class ProcessLineTestCase(unittest.TestCase):
