@@ -2,29 +2,6 @@ from chunk import Chunk
 from enum import Enum
 from typing import List
 
-corruptedLines = [
-    "{([(<{}[<>[]}>{[]{[(<()>",
-    "[[<[([]))<([[{}[[()]]]",
-    "[{[{({}]{}}([{[{{{}}([]",
-    "[<(<(<(<{}))><([]([]()",
-    "<{([([[(<>()){}]>(<<{{"
-]
-
-allLines = [
-    "[({(<(())[]>[[{[]{<()<>>",
-    "[(()[<>])]({[<{<<[]>>(",
-    "{([(<{}[<>[]}>{[]{[(<()>",
-    "(((({<>}<{<{<>}{[]{[]{}",
-    "[[<[([]))<([[{}[[()]]]",
-    "[{[{({}]{}}([{[{{{}}([]",
-    "{<[[]]>}<{[{[{[]{()[[[]",
-    "[<(<(<(<{}))><([]([]()",
-    "<{([([[(<>()){}]>(<<{{",
-    "<{([{{}}[<[[[<>{}]]]>[]]",
-    "([{<({<[{<([])>}]>})>}])"
-    # Added a valid line just to make sure that this works - will be covered in Unit Tests in the full solution
-]
-
 
 # https://docs.python.org/3/library/enum.html
 class LineStatus(Enum):
@@ -110,6 +87,16 @@ def get_error_score(line: str, character_index: int) -> int:
             return 25137
 
 
+def get_exercise_lines() -> List[str]:
+    # https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files
+    with open("exercise_part_one_input.txt", 'r') as f:
+        read_data = f.read()
+
+    file_lines = read_data.split("\n")
+
+    return file_lines
+
+
 def process_line(line: str) -> ProcessLineResult:
     current_chunk: Chunk = None
 
@@ -157,3 +144,17 @@ def process_line(line: str) -> ProcessLineResult:
         return ProcessLineResult.success_result()  # If we reach here then all pairs were successfully matched
 
     return ProcessLineResult.incomplete_result(first_unclosed_chunk.start_index())
+
+
+if __name__ == '__main__':
+    syntax_score = 0
+
+    exercise_lines = get_exercise_lines()
+
+    for exercise_line in exercise_lines:
+        result = process_line(exercise_line)
+
+        if result.line_status() == LineStatus.Corrupted:
+            syntax_score += get_error_score(exercise_line, result.failure_index())
+
+    print(f"Syntax error score {syntax_score}")
