@@ -1,4 +1,6 @@
+from chunk import Chunk
 from enum import Enum
+from typing import List
 
 corruptedLines = [
     "{([(<{}[<>[]}>{[]{[(<()>",
@@ -57,7 +59,7 @@ class ProcessLineResult:
 
 # https://docs.python.org/3/tutorial/classes.html
 class Chunk:
-    def __init__(self, start_character, start_index, parent=None):
+    def __init__(self, start_character: str, start_index: int, parent: Chunk = None):
         self._start_character = start_character
         self._start_index = start_index
         self._end_character = None
@@ -97,21 +99,21 @@ class Chunk:
 def process_line(line: str) -> ProcessLineResult:
     current_chunk: Chunk = None
 
-    parsed_chunks = list[Chunk]
+    parsed_chunks: List[Chunk] = []
 
-    for line_index in len(line):
+    for line_index in range(len(line)):
         match line[line_index]:
             case '<' | '{' | '(' | '[':
                 if current_chunk is None:
                     current_chunk = Chunk(line[line_index], line_index)
 
-                    parsed_chunks.Add(current_chunk)
+                    parsed_chunks.append(current_chunk)
 
                     continue
 
-                child_chunk = Chunk(line[line_index], line_index, child_chunk)
+                child_chunk = Chunk(line[line_index], line_index, current_chunk)
 
-                parsed_chunks.Add(child_chunk)
+                parsed_chunks.append(child_chunk)
 
                 current_chunk = child_chunk
 
@@ -120,7 +122,7 @@ def process_line(line: str) -> ProcessLineResult:
             case '>' | '}' | ')' | ']':
 
                 if current_chunk is not None and current_chunk.try_end_chunk(line[line_index], line_index):
-                    current_chunk = current_chunk.Parent
+                    current_chunk = current_chunk.parent()
 
                     continue
 
@@ -130,12 +132,14 @@ def process_line(line: str) -> ProcessLineResult:
 
     # If we get to this point then we haven't found any rogue end tags, do we have any unclosed chunks
 
+    first_unclosed_chunk = None
+
     for parsed_chunk in parsed_chunks:
         if isinstance(parsed_chunk, Chunk) and parsed_chunk.end_index() is None:
             first_unclosed_chunk = parsed_chunk
             break
 
     if first_unclosed_chunk is None:
-        return ProcessLineResult.success_result() # If we reach here then all pairs were successfully matched
+        return ProcessLineResult.success_result()  # If we reach here then all pairs were successfully matched
 
-    return ProcessLineResult.incomplete_result(first_unclosed_chunk.StartIndex)
+    return ProcessLineResult.incomplete_result(first_unclosed_chunk.start_index())
