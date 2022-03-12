@@ -96,6 +96,20 @@ class Chunk:
         return False
 
 
+def get_error_score(line: str, character_index: int) -> int:
+    error_character = line[character_index]
+
+    match error_character:
+        case ')':
+            return 3
+        case ']':
+            return 57
+        case '}':
+            return 1197
+        case '>':
+            return 25137
+
+
 def process_line(line: str) -> ProcessLineResult:
     current_chunk: Chunk = None
 
