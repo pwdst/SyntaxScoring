@@ -1,7 +1,7 @@
 import sys
 from chunk import Chunk
 from enum import Enum
-from math import ceil
+from math import floor
 from operator import mul
 from typing import List, Any
 
@@ -144,7 +144,7 @@ def get_exercise_lines() -> List[str]:
 
 
 def get_middle_list_item(items_list: List[Any]) -> Any:
-    middle_item_index = ceil(len(items_list) / 2) - 1  # Compensate for the fact lists are zero indexed
+    middle_item_index = floor(len(items_list) / 2)  # Compensate for the fact lists are zero indexed
 
     return items_list[middle_item_index]
 
