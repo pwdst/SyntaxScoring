@@ -1,5 +1,6 @@
 from chunk import Chunk
 from enum import Enum
+from operator import mul
 from typing import List
 
 
@@ -110,6 +111,25 @@ def get_completion_string(line: str, uncompleted_indexes: List[int]) -> str:
                 completion_string += ']'
 
     return completion_string
+
+
+def get_completion_string_score(completion_string: str) -> int:
+    score = 0
+
+    for character in completion_string:
+        score = mul(score, 5)
+
+        match character:
+            case ')':
+                score += 1
+            case ']':
+                score += 2
+            case '}':
+                score += 3
+            case '>':
+                score += 4
+
+    return score
 
 
 def get_exercise_lines() -> List[str]:

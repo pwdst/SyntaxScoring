@@ -103,6 +103,25 @@ class GetCompletionStringTestCase(unittest.TestCase):
                 self.assertEqual(expected, result)
 
 
+class GetCompletionStringScoreTestCase(unittest.TestCase):
+    def test_get_completion_string_score_returns_expected(self):
+        completion_string_scores = {
+            "}}]])})]": 288957,
+            ")}>]})": 5566,
+            "}}>}>))))": 1480781,
+            "]]}}]}]}>": 995444,
+            "])}>": 294
+        }
+
+        for completion_string in completion_string_scores:
+            with self.subTest(completion_string):
+                expected_score = completion_string_scores[completion_string]
+
+                result = main.get_completion_string_score(completion_string)
+
+                self.assertEqual(expected_score, result)
+
+
 class GetErrorScoreTestCase(unittest.TestCase):
     def test_get_error_score_returns_expected(self):
         line = "([{<({<[{<([])>}]>})>}])"
