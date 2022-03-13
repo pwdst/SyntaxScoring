@@ -143,6 +143,14 @@ class GetErrorScoreTestCase(unittest.TestCase):
                 self.assertEqual(expected_score, result)
 
 
+class GetMiddleListItemTestCase(unittest.TestCase):
+    def test_get_middle_list_item_returns_expected(self):
+        list_items = [514, 1501, 2507, 5281, 4705, 9093, 6113]
+
+        result = main.get_middle_list_item(list_items)
+
+        self.assertEqual(5281, result)
+
 class ProcessLineTestCase(unittest.TestCase):
     def test_process_line_valid_chunks_successful(self):
         valid_lines = ["([{<({<[{<([])>}]>})>}])"];

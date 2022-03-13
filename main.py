@@ -1,7 +1,9 @@
+import sys
 from chunk import Chunk
 from enum import Enum
+from math import ceil
 from operator import mul
-from typing import List
+from typing import List, Any
 
 
 # https://docs.python.org/3/library/enum.html
@@ -87,7 +89,6 @@ def get_error_score(line: str, character_index: int) -> int:
         case ']':
             return 57
         case '}':
-
             return 1197
         case '>':
             return 25137
@@ -142,6 +143,12 @@ def get_exercise_lines() -> List[str]:
     return file_lines
 
 
+def get_middle_list_item(items_list: List[Any]) -> Any:
+    middle_item_index = ceil(len(items_list) / 2) - 1  # Compensate for the fact lists are zero indexed
+
+    return items_list[middle_item_index]
+
+
 def process_line(line: str) -> ProcessLineResult:
     current_chunk: Chunk = None
 
@@ -193,6 +200,8 @@ def process_line(line: str) -> ProcessLineResult:
 if __name__ == '__main__':
     syntax_score = 0
 
+    completion_string_scores = []
+
     exercise_lines = get_exercise_lines()
 
     for exercise_line in exercise_lines:
@@ -201,4 +210,23 @@ if __name__ == '__main__':
         if result.line_status() == LineStatus.Corrupted:
             syntax_score += get_error_score(exercise_line, result.failure_index())
 
+        elif result.line_status() == LineStatus.Incomplete:
+            line_completion_string = get_completion_string(exercise_line, result.unclosed_tags())
+
+            line_completion_string_score = get_completion_string_score(line_completion_string)
+
+            completion_string_scores.append(line_completion_string_score)
+
+    even_count_completion_scores = divmod(len(completion_string_scores), 2) == 0
+
+    if even_count_completion_scores:  # Panic, chaos, something has gone wrong
+        # https://docs.python.org/3/library/sys.html#sys.exit
+        sys.exit(1)
+
+    sorted_completion_scores = sorted(completion_string_scores)
+
+    middle_completion_string_score = get_middle_list_item(sorted_completion_scores)
+
     print(f"Syntax error score {syntax_score}")
+
+    print(f"Middle completion error score {middle_completion_string_score}")
