@@ -86,9 +86,30 @@ def get_error_score(line: str, character_index: int) -> int:
         case ']':
             return 57
         case '}':
+
             return 1197
         case '>':
             return 25137
+
+
+def get_completion_string(line: str, uncompleted_indexes: List[int]) -> str:
+    # In C# I might consider using a StringBuilder or a string join here
+    completion_string = ""
+
+    for uncompleted_index in reversed(uncompleted_indexes):
+        start_character = line[uncompleted_index]
+
+        match start_character:
+            case '<':
+                completion_string += '>'
+            case '(':
+                completion_string += ')'
+            case '{':
+                completion_string += '}'
+            case '[':
+                completion_string += ']'
+
+    return completion_string
 
 
 def get_exercise_lines() -> List[str]:

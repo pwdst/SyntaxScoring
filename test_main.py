@@ -80,6 +80,29 @@ class ChunkTestCase(unittest.TestCase):
                 self.assertIsNone(chunk.end_index())
 
 
+class GetCompletionStringTestCase(unittest.TestCase):
+    def test_get_completion_string_returns_expected(self):
+        cases = [
+            ("[({(<(())[]>[[{[]{<()<>>", [0, 1, 2, 3, 12, 13, 14, 17], "}}]])})]"),
+            ("[(()[<>])]({[<{<<[]>>(", [10, 11, 12, 13, 14, 21], ")}>]})"),
+            ("(((({<>}<{<{<>}{[]{[]{}", [0, 1, 2, 3, 8, 9, 10, 15, 18], "}}>}>))))"),
+            ("{<[[]]>}<{[{[{[]{()[[[]", [8, 9, 10, 11, 12, 13, 16, 19, 20], "]]}}]}]}>"),
+            ("<{([{{}}[<[[[<>{}]]]>[]]", [0, 1, 2, 3], "])}>")
+        ]
+
+        for case in cases:
+            line = case[0]
+
+            with self.subTest(line):
+                uncompleted_indexes = case[1]
+
+                expected = case[2]
+
+                result = main.get_completion_string(line, uncompleted_indexes)
+
+                self.assertEqual(expected, result)
+
+
 class GetErrorScoreTestCase(unittest.TestCase):
     def test_get_error_score_returns_expected(self):
         line = "([{<({<[{<([])>}]>})>}])"
