@@ -6,3 +6,5 @@ Originally written in C# (LinqPad file SyntaxParsing.linq included in solution f
 Ported to Python 3 using documentation on the Python website, Pluralsight courses and Python Pocket Reference by Mark Lutz
 
 Outputs syntax error score of 392139 for the first exercise part - which is verified by Advent of Code
+
+Outputs middle completion string score of 4001832844 for the second exercise part - which is also verified by Advent of Code
