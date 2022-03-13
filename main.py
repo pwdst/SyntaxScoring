@@ -11,9 +11,10 @@ class LineStatus(Enum):
 
 
 class ProcessLineResult:
-    def __init__(self, line_status: LineStatus, failure_index: int = None):
+    def __init__(self, line_status: LineStatus, failure_index: int = None, unclosed_tags: List[int] = None):
         self._line_status = line_status
         self._failure_index = failure_index
+        self._unclosed_tags = unclosed_tags
 
     def line_status(self):
         return self._line_status
@@ -21,17 +22,20 @@ class ProcessLineResult:
     def failure_index(self):
         return self._failure_index
 
+    def unclosed_tags(self):
+        return self._unclosed_tags
+
     @staticmethod
     def success_result():
         return ProcessLineResult(LineStatus.ParsedSuccessfully)
 
     @staticmethod
     def corrupted_result(failure_index: int):
-        return ProcessLineResult(LineStatus.Corrupted, failure_index)
+        return ProcessLineResult(LineStatus.Corrupted, failure_index=failure_index)
 
     @staticmethod
-    def incomplete_result(failure_index: int):
-        return ProcessLineResult(LineStatus.Incomplete, failure_index)
+    def incomplete_result(unclosed_tags: List[int]):
+        return ProcessLineResult(LineStatus.Incomplete, unclosed_tags=unclosed_tags)
 
 
 # https://docs.python.org/3/tutorial/classes.html
@@ -133,17 +137,16 @@ def process_line(line: str) -> ProcessLineResult:
 
     # If we get to this point then we haven't found any rogue end tags, do we have any unclosed chunks
 
-    first_unclosed_chunk = None
+    unclosed_chunk_indexes = []
 
     for parsed_chunk in parsed_chunks:
         if isinstance(parsed_chunk, Chunk) and parsed_chunk.end_index() is None:
-            first_unclosed_chunk = parsed_chunk
-            break
+            unclosed_chunk_indexes.append(parsed_chunk.start_index())
 
-    if first_unclosed_chunk is None:
-        return ProcessLineResult.success_result()  # If we reach here then all pairs were successfully matched
+    if any(unclosed_chunk_indexes):
+        return ProcessLineResult.incomplete_result(unclosed_chunk_indexes)
 
-    return ProcessLineResult.incomplete_result(first_unclosed_chunk.start_index())
+    return ProcessLineResult.success_result()  # If we reach here then all pairs were successfully matched
 
 
 if __name__ == '__main__':

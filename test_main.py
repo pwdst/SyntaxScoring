@@ -112,6 +112,8 @@ class ProcessLineTestCase(unittest.TestCase):
 
             self.assertIsNone(result.failure_index())
 
+            self.assertIsNone(result.unclosed_tags())
+
     def test_process_corrupt_line_returns_expected(self):
         corrupt_lines = {"{([(<{}[<>[]}>{[]{[(<()>": 12,
                          "[[<[([]))<([[{}[[()]]]": 8,
@@ -128,21 +130,25 @@ class ProcessLineTestCase(unittest.TestCase):
 
             self.assertEqual(character_index, result.failure_index())
 
+            self.assertIsNone(result.unclosed_tags())
+
     def test_process_incomplete_line_returns_expected(self):
-        incomplete_lines = {"[({(<(())[]>[[{[]{<()<>>": 0,
-                            "[(()[<>])]({[<{<<[]>>(": 10,
-                            "(((({<>}<{<{<>}{[]{[]{}": 0,
-                            "{<[[]]>}<{[{[{[]{()[[[]": 8,
-                            "<{([{{}}[<[[[<>{}]]]>[]]": 0}
+        incomplete_lines = {"[({(<(())[]>[[{[]{<()<>>": [0, 1, 2, 3, 12, 13, 14, 17],
+                            "[(()[<>])]({[<{<<[]>>(": [10, 11, 12, 13, 14, 21],
+                            "(((({<>}<{<{<>}{[]{[]{}": [0, 1, 2, 3, 8, 9, 10, 15, 18],
+                            "{<[[]]>}<{[{[{[]{()[[[]": [8, 9, 10, 11, 12, 13, 16, 19, 20],
+                            "<{([{{}}[<[[[<>{}]]]>[]]": [0, 1, 2, 3]}
 
         for incomplete_line in incomplete_lines:
-            character_index = incomplete_lines.get(incomplete_line)
+            unclosed_tag_indexes = incomplete_lines[incomplete_line]
 
             result = main.process_line(incomplete_line)
 
             self.assertEqual(main.LineStatus.Incomplete, result.line_status())
 
-            self.assertEqual(character_index, result.failure_index())
+            self.assertEqual(unclosed_tag_indexes, result.unclosed_tags())
+
+            self.assertIsNone(result.failure_index())
 
 
 class ProcessLineResultTestCase(unittest.TestCase):
@@ -161,11 +167,13 @@ class ProcessLineResultTestCase(unittest.TestCase):
         self.assertEqual(8, result.failure_index())
 
     def test_process_line_success_result(self):
-        result = main.ProcessLineResult.incomplete_result(8)
+        result = main.ProcessLineResult.incomplete_result([8, 11, 12])
 
         self.assertEqual(main.LineStatus.Incomplete, result.line_status())
 
-        self.assertEqual(8, result.failure_index())
+        self.assertEqual([8, 11, 12], result.unclosed_tags())
+
+        self.assertIsNone(result.failure_index())
 
 
 if __name__ == '__main__':
